@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/views/drawer_view.dart';
 
 class Homeview extends StatefulWidget {
   const Homeview({super.key});
@@ -8,20 +9,46 @@ class Homeview extends StatefulWidget {
 }
 
 class _HomeviewState extends State<Homeview> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFE142),
+      key: scaffoldKey,
+      backgroundColor: Colors.blueAccent,
+      drawer: const SafeArea(
+        child: DrawerView()
+      ),
       appBar: AppBar(
+        toolbarHeight: 50,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            if(scaffoldKey.currentState!.isDrawerOpen){
+              scaffoldKey.currentState!.closeDrawer();
+            } else {
+              scaffoldKey.currentState!.openDrawer();
+            }
+          },
           icon: const Icon(Icons.menu)
         ),
-        title: const Text(
-          'Paris',
-          style: TextStyle(
-            fontWeight: FontWeight.bold
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.location_on, size: 20),
+            const SizedBox(width: 10),
+            const Text(
+              'Paris',
+              style: TextStyle(
+                fontWeight: FontWeight.bold
+              ),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_arrow_down_outlined),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            )
+          ],
         ),
         centerTitle: true,
       ),
@@ -30,24 +57,26 @@ class _HomeviewState extends State<Homeview> {
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
           child: Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20)
                   ),
-                  child: Text('Friday, 20 January'),
+                  child: const Text('Friday, 20 January'),
                 ),
-                Text('Sunny'),
-                Text(
+                const Text('Sunny'),
+                const Text(
                   '31°',
                   style: TextStyle(
-                    fontSize: 150
+                    fontSize: 200,
+                    height: .8,
+                    backgroundColor: Colors.amber
                   ),
                 ),
-                Row(
+                const Row(
                   children: [
                     Text(
                       'Daily Summary',
@@ -58,7 +87,7 @@ class _HomeviewState extends State<Homeview> {
                     ),
                   ],
                 ),
-                Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit. In finibus purus turpis, id dignissim neque molestie dictum.'),
+                const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit. In finibus purus turpis, id dignissim neque molestie dictum.'),
                 Container(
                   height: MediaQuery.sizeOf(context).height * .18,
                   decoration: BoxDecoration(
@@ -68,39 +97,65 @@ class _HomeviewState extends State<Homeview> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Icon(Icons.waves, color: Colors.white),
-                      Icon(Icons.water_drop_outlined, color: Colors.white),
-                      Icon(Icons.remove_red_eye_outlined, color: Colors.white)
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * .12,
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Icon(Icons.air_outlined, color: Colors.white, size: 38),
+                            Column(
+                              children: [
+                                Text(
+                                  '42.2km/h',
+                                  style: TextStyle(
+                                    color: Colors.white
+                                  ),
+                                ),
+                                Text(
+                                  'Wind',
+                                  style: TextStyle(
+                                    color: Colors.white
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.water_drop_outlined, color: Colors.white),
+                      const Icon(Icons.remove_red_eye_outlined, color: Colors.white)
                     ],
                   ),
                 ),
-                Container(
-                  height: MediaQuery.sizeOf(context).height * .18,
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * .2,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Weekly forecast',
                             style: TextStyle(
                               fontWeight: FontWeight.bold
                             ),
                           ),
-                          Icon(Icons.arrow_forward)
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.arrow_forward))
                         ],
                       ),
                       Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             height: MediaQuery.sizeOf(context).height * .13,
                             decoration: BoxDecoration(
                               border: Border.all(width: 2, style: BorderStyle.solid),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Column(
+                            child: const Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Text('25°'),
