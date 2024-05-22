@@ -6,9 +6,9 @@ class WeatherApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(fontFamily: 'SF Compact display'),
-      home: const Homeview(),
+    return const MaterialApp(
+      // theme: ThemeData(fontFamily: 'Roc Grotesk'),
+      home: Homeview(),
     );
   }
 }
