@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class ScaleSize {
@@ -13,7 +11,7 @@ class ScaleSize {
     _mediaQueryData = MediaQuery.of(context);
     screenWidth = _mediaQueryData!.size.width;
     screenHeight = _mediaQueryData!.size.height;
-    blockSizeHorizontal = screenWidth!/100;
-    blockSizeVertical = screenHeight!/100;
+    blockSizeHorizontal = screenWidth! / 100;
+    blockSizeVertical = screenHeight! / 100;
   }
 }

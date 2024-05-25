@@ -58,7 +58,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib/assets/images/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -71,16 +71,15 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Roc Grotesk
-  #     fonts:
-  #       - asset: lib/assets/fonts/rocgroteskcond-regular.otf
-  #       - asset: lib/assets/fonts/rocgroteskcond-medium.otf
-  #       - asset: lib/assets/fonts/rocgroteskcond-light.otf
-  #       - asset: lib/assets/fonts/rocgroteskcond-extralight.otf
-  #       - asset: lib/assets/fonts/rocgroteskcond-bold.otf
-  #       - asset: lib/assets/fonts/rocgrotesk-light.otf
-  #         weight: 600
+  fonts:
+    - family: Roc Grotesk
+      fonts:
+        - asset: assets/fonts/rocgrotesk-light.otf
+          weight: 300
+        - asset: assets/fonts/rocgroteskcond-regular.otf
+          weight: 500
+        - asset: assets/fonts/rocgroteskcond-bold.otf
+          weight: 900
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

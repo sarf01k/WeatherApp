@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/src/common/theme.dart';
 
 class WeatherInfoCard extends StatelessWidget {
   const WeatherInfoCard({super.key});
@@ -11,24 +12,18 @@ class WeatherInfoCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Image.asset(
-            'lib/assets/images/wind.png',
+            'assets/images/wind.png',
             scale: 2.8,
           ),
-          const Column(
+          Column(
             children: [
               Text(
                 'Wind Force',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
+                style: theme.textTheme.displayMedium,
               ),
               Text(
                 'Wind',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400),
+                style: theme.textTheme.displaySmall,
               ),
             ],
           ),

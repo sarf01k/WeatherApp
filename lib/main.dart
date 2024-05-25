@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/app.dart';
+import 'package:weather_app/src/app.dart';
 
 void main() {
-  runApp(
-    const WeatherApp()
-  );
+  runApp(const WeatherApp());
 }
