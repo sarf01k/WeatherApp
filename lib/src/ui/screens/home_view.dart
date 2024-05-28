@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/src/common/theme.dart';
 import 'package:weather_app/src/ui/widgets/weather_info_card.dart';
 
@@ -10,15 +11,17 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+  void getLoc() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low);
+    print(position);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
-      // backgroundColor: Colors.blueAccent,
       appBar: AppBar(
-        // toolbarHeight: 50,
         title: const Text(
           '22 August, Monday',
         ),
@@ -40,6 +43,11 @@ class _HomeViewState extends State<HomeView> {
             children: [
               Column(
                 children: [
+                  TextButton(
+                      onPressed: () {
+                        getLoc();
+                      },
+                      child: Text('GL')),
                   SizedBox(height: MediaQuery.sizeOf(context).height * .08),
                   Text(
                     '37°',
@@ -70,9 +78,21 @@ class _HomeViewState extends State<HomeView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      WeatherInfoCard(),
-                      WeatherInfoCard(),
-                      WeatherInfoCard()
+                      WeatherInfoCard(
+                        image: 'assets/images/wind.png',
+                        name: 'Wind Force',
+                        values: '5/km',
+                      ),
+                      WeatherInfoCard(
+                        image: 'assets/images/humidity.png',
+                        name: 'Humidity',
+                        values: '123',
+                      ),
+                      WeatherInfoCard(
+                        image: 'assets/images/windsock.png',
+                        name: 'Precipitation',
+                        values: '456',
+                      )
                     ],
                   ))
             ],
