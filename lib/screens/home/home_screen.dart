@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:weather_app/src/common/theme.dart';
-import 'package:weather_app/src/ui/widgets/weather_info_card.dart';
+import 'package:weather_app/common/theme.dart';
+import 'package:weather_app/screens/home/widgets/weather_info_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -11,11 +12,22 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  void getLoc() async {
+  late Position position;
+  void getCordinates() async {
     LocationPermission permission = await Geolocator.requestPermission();
-    Position position = await Geolocator.getCurrentPosition(
+    position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.low);
     print(position);
+  }
+
+  void getLocation() async {
+    late List<Placemark> placemark;
+    try {
+      placemark = await placemarkFromCoordinates(position.latitude, position.longitude);
+      print(placemark);
+    } catch (e) {
+      print('An error occured');
+    }
   }
 
   @override
@@ -35,8 +47,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: SafeArea(
         child: Padding(
-          padding:
-              const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 10),
+          padding: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -44,10 +55,17 @@ class _HomeViewState extends State<HomeView> {
               Column(
                 children: [
                   TextButton(
-                      onPressed: () {
-                        getLoc();
-                      },
-                      child: Text('GL')),
+                    onPressed: () {
+                      getCordinates();
+                    },
+                    child: Text('GL')
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      getLocation();
+                    },
+                    child: Text('GL')
+                  ),
                   SizedBox(height: MediaQuery.sizeOf(context).height * .08),
                   Text(
                     '37°',
@@ -74,27 +92,28 @@ class _HomeViewState extends State<HomeView> {
                 ],
               ),
               const Positioned(
-                  top: 30,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      WeatherInfoCard(
-                        image: 'assets/images/wind.png',
-                        name: 'Wind Force',
-                        values: '5/km',
-                      ),
-                      WeatherInfoCard(
-                        image: 'assets/images/humidity.png',
-                        name: 'Humidity',
-                        values: '123',
-                      ),
-                      WeatherInfoCard(
-                        image: 'assets/images/windsock.png',
-                        name: 'Precipitation',
-                        values: '456',
-                      )
-                    ],
-                  ))
+                top: 30,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    WeatherInfoCard(
+                      image: 'assets/images/wind.png',
+                      name: 'Wind Force',
+                      values: '5/km',
+                    ),
+                    WeatherInfoCard(
+                      image: 'assets/images/humidity.png',
+                      name: 'Humidity',
+                      values: '123',
+                    ),
+                    WeatherInfoCard(
+                      image: 'assets/images/windsock.png',
+                      name: 'Precipitation',
+                      values: '456',
+                    )
+                  ],
+                )
+              )
             ],
           ),
         ),
