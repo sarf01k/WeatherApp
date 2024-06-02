@@ -9,7 +9,7 @@ class WeatherApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: theme.copyWith(scaffoldBackgroundColor: const Color(0xFF195A5D)),
-      home: const HomeView(),
+      home: const HomeScreen(),
     );
   }
 }
