@@ -1,145 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:provider/provider.dart';
-import 'package:weather_app/common/theme.dart';
-import 'package:weather_app/providers/weather_provider.dart';
-import 'package:weather_app/screens/home/widgets/weather_info_card.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:weather_app/models/weather.dart';
+import 'package:weather_app/services/location.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final url = const String.fromEnvironment('BASE_URL');
 
-  late Position _coordinates;
-  // late final Position _coordinates;
-  // List<Placemark> location= [];
+  final apiKey = const String.fromEnvironment('API_KEY');
 
-  @override
-  void initState() {
-    super.initState();
-    getCurrentCoordinates();
+  Future<Weather> getWeather() async {
+    final Position coordinates = await getCoordinates();
+
+    try {
+      final response = await http.get(Uri.parse('${url}lat=${coordinates.latitude}&lon=${coordinates.longitude}&appid=${apiKey}'));
+      if (response.statusCode == 200) {
+        try {
+          final weather = Weather.fromJSON(jsonDecode(response.body));
+          return weather;
+        } catch (e) {
+          throw Exception('Failed to parse weather data');
+        }
+      } else {
+        throw Exception('Failed to load weather');
+      }
+    } on Exception catch (e) {
+      throw Exception('Failed to load weather');
+    }
   }
 
-  getCurrentCoordinates() {
-    final weatherProvider = Provider.of<WeatherProvider>(context, listen: false);
-    weatherProvider.getCoordinates().then((value) {
-      _coordinates = value;
-      print(_coordinates);
-    });
+  getLocation() async {
+    final Position coordinates = await getCoordinates();
+    final List<Placemark> location = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
   }
-
-  @override
-  void dispose() {
-    // _coordinates = null;
-    // location = [];
-    super.dispose();
-  }
-
-  // getCurrentLocation() async {
-  //   location = await weatherProvider.getLocation(coordinates!.latitude, coordinates!.longitude);
-  // }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WeatherProvider>(
-      builder: (context, provider, _) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              '22 August, Monday',
-            ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.more_vert_outlined, size: 30),
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          '22 August, Monday',
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.more_vert_outlined, size: 30),
           ),
-          body: SafeArea(
-            child: Consumer<WeatherProvider>(
-              builder: (context, provider, _) {
-                return  Padding(
-                  padding: const EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          TextButton(
-                            onPressed: () {
-                              // getCurrentCoordinates();
-                            },
-                            child: Text('GC')
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // getCurrentCoordinates();
-                            },
-                            child: Text('GL')
-                          ),
-                          SizedBox(height: MediaQuery.sizeOf(context).height * .08),
-                          Text(
-                            '37°',
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                          SizedBox(height: MediaQuery.sizeOf(context).height * .05),
-                          Image.asset(
-                            'assets/images/storm.png',
-                            scale: .9,
-                          ),
-                          SizedBox(height: MediaQuery.sizeOf(context).height * .02),
-                          Column(
-                            children: [
-                              Text(
-                                'Perfect day today',
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                              Text(
-                                _coordinates.latitude.toString(),
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Positioned(
-                        top: 30,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            WeatherInfoCard(
-                              image: 'assets/images/wind.png',
-                              name: 'Wind Force',
-                              values: '5/km',
-                            ),
-                            WeatherInfoCard(
-                              image: 'assets/images/humidity.png',
-                              name: 'Humidity',
-                              values: '123',
-                            ),
-                            WeatherInfoCard(
-                              image: 'assets/images/windsock.png',
-                              name: 'Precipitation',
-                              values: '456',
-                            )
-                          ],
-                        )
-                      )
-                    ],
-                  ),
-                );
-              }
-            )
-          ),
-        );
-      }
+        ],
+      ),
+      body: SafeArea(
+        child: FutureBuilder(
+          future: getWeather(),
+          builder: ((context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (snapshot.hasData) {
+              final Weather? weather = snapshot.data;
+              return Text('${weather!.sys!.country}');
+            } else {
+              return Center(
+                child: Text('Failed to load weather')
+              );
+            }
+          })
+        )
+      )
     );
   }
 }
