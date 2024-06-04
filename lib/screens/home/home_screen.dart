@@ -18,11 +18,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final apiKey = const String.fromEnvironment('API_KEY');
 
+  Position? coordinates;
+  List<Placemark>? location;
+
+  Future<List<Placemark>?> getLocation() async {
+    location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
+    return location;
+  }
+
   Future<Weather> getWeather() async {
-    final Position coordinates = await getCoordinates();
+    coordinates = await getCoordinates();
 
     try {
-      final response = await http.get(Uri.parse('${url}lat=${coordinates.latitude}&lon=${coordinates.longitude}&appid=${apiKey}'));
+      final response = await http.get(Uri.parse('${url}lat=${coordinates!.latitude}&lon=${coordinates!.longitude}&appid=${apiKey}&units=metric'));
       if (response.statusCode == 200) {
         try {
           final weather = Weather.fromJSON(jsonDecode(response.body));
@@ -36,11 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
     } on Exception catch (e) {
       throw Exception('Failed to load weather');
     }
-  }
-
-  getLocation() async {
-    final Position coordinates = await getCoordinates();
-    final List<Placemark> location = await placemarkFromCoordinates(coordinates.latitude, coordinates.longitude);
   }
 
   @override
@@ -59,23 +62,45 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder(
-          future: getWeather(),
-          builder: ((context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (snapshot.hasData) {
-              final Weather? weather = snapshot.data;
-              return Text('${weather!.sys!.country}');
-            } else {
-              return Center(
-                child: Text('Failed to load weather')
-              );
-            }
-          })
+        child: Column(
+          children: [
+            FutureBuilder(
+              future: getWeather(),
+              builder: ((context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasData) {
+                  final Weather? weather = snapshot.data;
+                  return Text('${weather!.main!.humidity}');
+                } else {
+                  return Center(
+                    child: Text('Failed to load weather')
+                  );
+                }
+              })
+            ),
+            FutureBuilder(
+              future: getLocation(),
+              builder: ((context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasData) {
+                  final _location = snapshot.data;
+                  return Text('${_location![0].administrativeArea}, ${_location![0].country}');
+                } else {
+                  return Center(
+                    child: Text('Failed to load weather')
+                  );
+                }
+              })
+            )
+          ],
         )
       )
     );
