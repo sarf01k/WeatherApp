@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/services/location.dart';
 
@@ -21,13 +23,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? coordinates;
   List<Placemark>? location;
 
-  Future<List<Placemark>?> getLocation() async {
-    location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
-    return location;
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getCo();
+  // }
+
+  // Future<List<Placemark>?> getLocation() async {
+  //   location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
+  //   return location;
+  // }
+  // getCo() async {
+  //   coordinates = await getCoordinates();
+  //   print(coordinates);
+  // }
 
   Future<Weather> getWeather() async {
     coordinates = await getCoordinates();
+    location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
 
     try {
       final response = await http.get(Uri.parse('${url}lat=${coordinates!.latitude}&lon=${coordinates!.longitude}&appid=${apiKey}&units=metric'));
@@ -46,62 +59,82 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String getCurrentDate() {
+    DateTime now = DateTime.now(); // Get the current date and time
+    String formattedDate = DateFormat('EEEE, MMMM d').format(now); // Format the date
+    return formattedDate;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '22 August, Monday',
+      body: Container(
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topCenter,
+            end: AlignmentDirectional.bottomCenter,
+            colors: [Color(0xFF365A7A), Color(0xFF041C48)]
+          )
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.more_vert_outlined, size: 30),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            FutureBuilder(
-              future: getWeather(),
-              builder: ((context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (snapshot.hasData) {
-                  final Weather? weather = snapshot.data;
-                  return Text('${weather!.main!.humidity}');
-                } else {
-                  return Center(
-                    child: Text('Failed to load weather')
-                  );
-                }
-              })
-            ),
-            FutureBuilder(
-              future: getLocation(),
-              builder: ((context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (snapshot.hasData) {
-                  final _location = snapshot.data;
-                  return Text('${_location![0].administrativeArea}, ${_location![0].country}');
-                } else {
-                  return Center(
-                    child: Text('Failed to load weather')
-                  );
-                }
-              })
-            )
-          ],
-        )
+        child: SafeArea(
+          child: FutureBuilder(
+            future: getWeather(),
+            builder: ((context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: SpinKitThreeBounce(
+                    color: Colors.white,
+                    size: 15,
+                  ),
+                );
+              }
+              if (snapshot.hasData) {
+                final Weather? weather = snapshot.data;
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Image.network('https://openweathermap.org/img/wn/${weather!.weather![0].icon}@2x.png', scale: .5,),
+                    Text(getCurrentDate().toString()),
+                    Text('${weather!.main!.temp!.ceil()}°'),
+                    Text('${location![0].administrativeArea}, ${location![0].country}'),
+                    IntrinsicHeight(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            children: [
+                              Icon(Icons.cloud),
+                              Text('${weather.main!.pressure}'),
+                            ],
+                          ),
+                          VerticalDivider(thickness: .5),
+                          Column(
+                            children: [
+                              Icon(Icons.water_drop_outlined),
+                              Text('${weather.main!.humidity}'),
+                            ],
+                          ),
+                          VerticalDivider(thickness: .5),
+                          Column(
+                            children: [
+                              Icon(Icons.air),
+                              Text('${weather.wind!.speed!.ceil()}'),
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                );
+              } else {
+                return Center(
+                  child: Text('Failed to load weather')
+                );
+              }
+            })
+          )
+        ),
       )
     );
   }
