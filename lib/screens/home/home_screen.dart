@@ -9,7 +9,7 @@ import 'package:weather_app/models/weather.dart';
 import 'package:weather_app/services/location.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,45 +23,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Position? coordinates;
   List<Placemark>? location;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   getCo();
-  // }
-
-  // Future<List<Placemark>?> getLocation() async {
-  //   location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
-  //   return location;
-  // }
-  // getCo() async {
-  //   coordinates = await getCoordinates();
-  //   print(coordinates);
-  // }
-
   Future<Weather> getWeather() async {
     coordinates = await getCoordinates();
     location = await placemarkFromCoordinates(coordinates!.latitude, coordinates!.longitude);
 
-    try {
-      final response = await http.get(Uri.parse('${url}lat=${coordinates!.latitude}&lon=${coordinates!.longitude}&appid=${apiKey}&units=metric'));
-      if (response.statusCode == 200) {
-        try {
-          final weather = Weather.fromJSON(jsonDecode(response.body));
-          return weather;
-        } catch (e) {
-          throw Exception('Failed to parse weather data');
-        }
-      } else {
-        throw Exception('Failed to load weather');
+    final response = await http.get(Uri.parse('${url}lat=${coordinates!.latitude}&lon=${coordinates!.longitude}&appid=$apiKey&units=metric'));
+    if (response.statusCode == 200) {
+      try {
+        final weather = Weather.fromJSON(jsonDecode(response.body));
+        return weather;
+      } catch (e) {
+        throw Exception('Failed to parse weather data');
       }
-    } on Exception catch (e) {
+    } else {
       throw Exception('Failed to load weather');
     }
   }
 
   String getCurrentDate() {
-    DateTime now = DateTime.now(); // Get the current date and time
-    String formattedDate = DateFormat('EEEE, MMMM d').format(now); // Format the date
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('EEEE, MMMM d').format(now);
     return formattedDate;
   }
 
@@ -70,21 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Container(
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topCenter,
-            end: AlignmentDirectional.bottomCenter,
-            colors: [Color(0xFF365A7A), Color(0xFF041C48)]
-          )
+        decoration: const BoxDecoration(
+          color: Color(0xFFEBF1FF)
         ),
         child: SafeArea(
           child: FutureBuilder(
             future: getWeather(),
             builder: ((context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
+                return const Center(
                   child: SpinKitThreeBounce(
-                    color: Colors.white,
+                    duration: Durations.medium4,
+                    color: Colors.black,
                     size: 15,
                   ),
                 );
@@ -92,34 +70,87 @@ class _HomeScreenState extends State<HomeScreen> {
               if (snapshot.hasData) {
                 final Weather? weather = snapshot.data;
                 return Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Image.network('https://openweathermap.org/img/wn/${weather!.weather![0].icon}@2x.png', scale: .5,),
-                    Text(getCurrentDate().toString()),
-                    Text('${weather!.main!.temp!.ceil()}°'),
-                    Text('${location![0].administrativeArea}, ${location![0].country}'),
+                    Text(
+                      '${weather!.weather![0].main}',
+                      style: const TextStyle(
+                        fontSize: 18
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      child: Column(
+                        children: [
+                          Placeholder(
+                            color: Colors.transparent,
+                            child: Image.network('https://openweathermap.org/img/wn/${weather.weather![0].icon}@2x.png'),
+                          ),
+                          Text(
+                            getCurrentDate().toString(),
+                            style: const TextStyle(
+                              fontSize: 18
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 0),
+                    Text(
+                      '${weather.main!.temp!.ceil()}°',
+                      style: const TextStyle(
+                        fontSize: 150,
+                        height: .77,
+                      ),
+                    ),
+                    Text(
+                      '${location![0].administrativeArea}',
+                      style: const TextStyle(
+                        fontSize: 25
+                      ),
+                    ),
+                    const SizedBox(height: 30),
                     IntrinsicHeight(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Column(
                             children: [
-                              Icon(Icons.cloud),
-                              Text('${weather.main!.pressure}'),
+                              const Icon(Icons.cloud_outlined),
+                              Text(
+                                '${weather.main!.pressure}%',
+                                style: const TextStyle(
+                                  fontSize: 18
+                                ),
+                              ),
                             ],
                           ),
-                          VerticalDivider(thickness: .5),
+                          const SizedBox(width: 30),
+                          const VerticalDivider(thickness: .5, color: Colors.black),
+                          const SizedBox(width: 30),
                           Column(
                             children: [
-                              Icon(Icons.water_drop_outlined),
-                              Text('${weather.main!.humidity}'),
+                              const Icon(Icons.water_drop_outlined),
+                              Text(
+                                '${weather.main!.humidity}%',
+                                style: const TextStyle(
+                                  fontSize: 18
+                                ),
+                              ),
                             ],
                           ),
-                          VerticalDivider(thickness: .5),
+                          const SizedBox(width: 30),
+                          const VerticalDivider(thickness: .5, color: Colors.black),
+                          const SizedBox(width: 30),
                           Column(
                             children: [
-                              Icon(Icons.air),
-                              Text('${weather.wind!.speed!.ceil()}'),
+                              const Icon(Icons.air),
+                              Text(
+                                '${weather.wind!.speed!.ceil()} mph',
+                                style: const TextStyle(
+                                  fontSize: 18
+                                ),
+                              ),
                             ],
                           )
                         ],
@@ -129,7 +160,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               } else {
                 return Center(
-                  child: Text('Failed to load weather')
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Failed to load weather',
+                        style: TextStyle(
+                          color: Colors.white
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            getWeather();
+                          });
+                        },
+                        child: const Text(
+                          'Retry'
+                        )
+                      )
+                    ],
+                  )
                 );
               }
             })
